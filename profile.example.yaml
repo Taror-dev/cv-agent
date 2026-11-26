@@ -1,0 +1,21 @@
+name: "Max Mustermann"
+contact:
+  address: "Musterstraße 1, 12345 Musterstadt"
+  phone: "+49 000 0000000"
+  email: "max.mustermann@example.invalid"
+languages:
+  - "Deutsch (B2)"
+  - "Englisch (B1)"
+experience:
+  - period: "01/2024 – heute"
+    role: "Softwareentwickler"
+    company: "Musterfirma GmbH"
+    tasks:
+      - "Entwicklung interner Anwendungen"
+education:
+  - period: "09/2018 – 06/2022"
+    degree: "Bachelor Informatik"
+    school: "Musterhochschule"
+skills:
+  - "Python"
+  - "SQL"

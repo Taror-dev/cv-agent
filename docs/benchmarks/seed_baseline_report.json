@@ -1,0 +1,438 @@
+{
+  "recorded_on": "2026-10-06",
+  "status": "synthetic_seed_only_not_release_validation",
+  "reports": {
+    "calibration": {
+      "engine": "dictionary.v1",
+      "rules_hash": "e891422c37ad0436d60fa199d30dfec8f3f7a3ff642acf59e7f9039819cabd74",
+      "dataset_hash": "25508e43538a7080a518f0a0c64d5e738641359c8e5a273242fb67342c046747",
+      "label_source": "synthetic_scenario_expectations",
+      "split": "calibration",
+      "unique_vacancies": 6,
+      "elapsed_seconds": 0.026,
+      "metrics": {
+        "cases": 36,
+        "scored": 36,
+        "suitable": 6,
+        "k": 10,
+        "precision_at_k": 0.6,
+        "recall_at_k": 1.0,
+        "ndcg_at_k": 1.0,
+        "top_cases": [
+          "data/data_science",
+          "data/junior_python",
+          "frontend/frontend",
+          "operations/devops",
+          "python/backend",
+          "python/junior_python",
+          "learner/junior_python",
+          "data/backend",
+          "frontend/junior_python",
+          "java/java_backend"
+        ]
+      },
+      "per_profile": {
+        "python": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 2,
+          "k": 6,
+          "precision_at_k": 0.3333,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 0.9871,
+          "top_cases": [
+            "python/backend",
+            "python/junior_python",
+            "python/devops",
+            "python/data_science",
+            "python/frontend",
+            "python/java_backend"
+          ]
+        },
+        "java": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 0,
+          "k": 6,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "java/java_backend",
+            "java/junior_python",
+            "java/devops",
+            "java/frontend",
+            "java/data_science",
+            "java/backend"
+          ]
+        },
+        "frontend": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 1,
+          "k": 6,
+          "precision_at_k": 0.1667,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "frontend/frontend",
+            "frontend/junior_python",
+            "frontend/backend",
+            "frontend/devops",
+            "frontend/java_backend",
+            "frontend/data_science"
+          ]
+        },
+        "data": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 2,
+          "k": 6,
+          "precision_at_k": 0.3333,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "data/data_science",
+            "data/junior_python",
+            "data/backend",
+            "data/java_backend",
+            "data/devops",
+            "data/frontend"
+          ]
+        },
+        "operations": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 1,
+          "k": 6,
+          "precision_at_k": 0.1667,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "operations/devops",
+            "operations/junior_python",
+            "operations/backend",
+            "operations/frontend",
+            "operations/java_backend",
+            "operations/data_science"
+          ]
+        },
+        "learner": {
+          "cases": 6,
+          "scored": 6,
+          "suitable": 0,
+          "k": 6,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "learner/junior_python",
+            "learner/data_science",
+            "learner/backend",
+            "learner/frontend",
+            "learner/devops",
+            "learner/java_backend"
+          ]
+        }
+      },
+      "limitations": [
+        "Dictionary baseline, not production scoring or the final weighted formula.",
+        "Synthetic labels do not validate quality on real vacancies.",
+        "Pooled ranking is diagnostic; per-profile ranking is the application scenario.",
+        "Latency covers in-memory rules only, not document extraction, LLM or embeddings."
+      ]
+    },
+    "holdout": {
+      "engine": "dictionary.v1",
+      "rules_hash": "e891422c37ad0436d60fa199d30dfec8f3f7a3ff642acf59e7f9039819cabd74",
+      "dataset_hash": "25508e43538a7080a518f0a0c64d5e738641359c8e5a273242fb67342c046747",
+      "label_source": "synthetic_scenario_expectations",
+      "split": "holdout",
+      "unique_vacancies": 4,
+      "elapsed_seconds": 0.0141,
+      "metrics": {
+        "cases": 24,
+        "scored": 24,
+        "suitable": 3,
+        "k": 10,
+        "precision_at_k": 0.3,
+        "recall_at_k": 1.0,
+        "ndcg_at_k": 0.9508,
+        "top_cases": [
+          "java/integration",
+          "python/sql_support",
+          "data/sql_support",
+          "data/rag",
+          "python/integration",
+          "operations/sql_support",
+          "data/office",
+          "frontend/office",
+          "learner/office",
+          "operations/office"
+        ]
+      },
+      "per_profile": {
+        "python": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 1,
+          "k": 4,
+          "precision_at_k": 0.25,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 0.9832,
+          "top_cases": [
+            "python/sql_support",
+            "python/integration",
+            "python/office",
+            "python/rag"
+          ]
+        },
+        "java": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 1,
+          "k": 4,
+          "precision_at_k": 0.25,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "java/integration",
+            "java/sql_support",
+            "java/rag",
+            "java/office"
+          ]
+        },
+        "frontend": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 0,
+          "k": 4,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": null,
+          "top_cases": [
+            "frontend/office",
+            "frontend/sql_support",
+            "frontend/integration",
+            "frontend/rag"
+          ]
+        },
+        "data": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 1,
+          "k": 4,
+          "precision_at_k": 0.25,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "data/sql_support",
+            "data/rag",
+            "data/office",
+            "data/integration"
+          ]
+        },
+        "operations": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 0,
+          "k": 4,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": null,
+          "top_cases": [
+            "operations/sql_support",
+            "operations/office",
+            "operations/integration",
+            "operations/rag"
+          ]
+        },
+        "learner": {
+          "cases": 4,
+          "scored": 4,
+          "suitable": 0,
+          "k": 4,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "learner/office",
+            "learner/integration",
+            "learner/rag",
+            "learner/sql_support"
+          ]
+        }
+      },
+      "limitations": [
+        "Dictionary baseline, not production scoring or the final weighted formula.",
+        "Synthetic labels do not validate quality on real vacancies.",
+        "Pooled ranking is diagnostic; per-profile ranking is the application scenario.",
+        "Latency covers in-memory rules only, not document extraction, LLM or embeddings."
+      ]
+    },
+    "all": {
+      "engine": "dictionary.v1",
+      "rules_hash": "e891422c37ad0436d60fa199d30dfec8f3f7a3ff642acf59e7f9039819cabd74",
+      "dataset_hash": "25508e43538a7080a518f0a0c64d5e738641359c8e5a273242fb67342c046747",
+      "label_source": "synthetic_scenario_expectations",
+      "split": "all",
+      "unique_vacancies": 10,
+      "elapsed_seconds": 0.0381,
+      "metrics": {
+        "cases": 60,
+        "scored": 60,
+        "suitable": 9,
+        "k": 10,
+        "precision_at_k": 0.9,
+        "recall_at_k": 1.0,
+        "ndcg_at_k": 1.0,
+        "top_cases": [
+          "data/data_science",
+          "data/junior_python",
+          "frontend/frontend",
+          "java/integration",
+          "operations/devops",
+          "python/backend",
+          "python/junior_python",
+          "python/sql_support",
+          "data/sql_support",
+          "learner/junior_python"
+        ]
+      },
+      "per_profile": {
+        "python": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 3,
+          "k": 10,
+          "precision_at_k": 0.3,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 0.9875,
+          "top_cases": [
+            "python/backend",
+            "python/junior_python",
+            "python/sql_support",
+            "python/integration",
+            "python/devops",
+            "python/office",
+            "python/rag",
+            "python/data_science",
+            "python/frontend",
+            "python/java_backend"
+          ]
+        },
+        "java": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 1,
+          "k": 10,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "java/integration",
+            "java/java_backend",
+            "java/junior_python",
+            "java/sql_support",
+            "java/devops",
+            "java/frontend",
+            "java/rag",
+            "java/data_science",
+            "java/backend",
+            "java/office"
+          ]
+        },
+        "frontend": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 1,
+          "k": 10,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "frontend/frontend",
+            "frontend/junior_python",
+            "frontend/office",
+            "frontend/sql_support",
+            "frontend/integration",
+            "frontend/backend",
+            "frontend/devops",
+            "frontend/java_backend",
+            "frontend/rag",
+            "frontend/data_science"
+          ]
+        },
+        "data": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 3,
+          "k": 10,
+          "precision_at_k": 0.3,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "data/data_science",
+            "data/junior_python",
+            "data/sql_support",
+            "data/backend",
+            "data/rag",
+            "data/java_backend",
+            "data/office",
+            "data/integration",
+            "data/devops",
+            "data/frontend"
+          ]
+        },
+        "operations": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 1,
+          "k": 10,
+          "precision_at_k": 0.1,
+          "recall_at_k": 1.0,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "operations/devops",
+            "operations/junior_python",
+            "operations/sql_support",
+            "operations/backend",
+            "operations/office",
+            "operations/integration",
+            "operations/frontend",
+            "operations/java_backend",
+            "operations/rag",
+            "operations/data_science"
+          ]
+        },
+        "learner": {
+          "cases": 10,
+          "scored": 10,
+          "suitable": 0,
+          "k": 10,
+          "precision_at_k": 0.0,
+          "recall_at_k": null,
+          "ndcg_at_k": 1.0,
+          "top_cases": [
+            "learner/junior_python",
+            "learner/office",
+            "learner/integration",
+            "learner/rag",
+            "learner/data_science",
+            "learner/backend",
+            "learner/frontend",
+            "learner/devops",
+            "learner/java_backend",
+            "learner/sql_support"
+          ]
+        }
+      },
+      "limitations": [
+        "Dictionary baseline, not production scoring or the final weighted formula.",
+        "Synthetic labels do not validate quality on real vacancies.",
+        "Pooled ranking is diagnostic; per-profile ranking is the application scenario.",
+        "Latency covers in-memory rules only, not document extraction, LLM or embeddings."
+      ]
+    }
+  }
+}

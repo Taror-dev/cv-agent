@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Выполнение – CV-Агент{% endblock %}
+{% block page_title %}Вакансии{% endblock %}
+{% block content %}
+  <h1>Команда: <code>{{ cmd }}{% if args %} {{ args|join(' ') }}{% endif %}</code></h1>
+  {% if llm_note %}<p class="note">{{ llm_note }}</p>{% endif %}
+  <p>
+    <span class="badge {{ 'ok' if code == 0 else 'err' }}">
+      Код завершения: {{ code }}{% if code == 0 %} — успешно{% endif %}
+    </span>
+  </p>
+  <div class="btn-row" style="margin-top:0;">
+    <a class="btn secondary" href="{{ url_for('results') }}">Назад</a>
+    <a class="btn secondary" href="{{ url_for('results') }}">К результатам</a>
+  </div>
+  <pre class="term">{{ output }}</pre>
+{% endblock %}

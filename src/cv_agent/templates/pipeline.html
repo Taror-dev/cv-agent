@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Поиск вакансий – CV-Агент{% endblock %}
+{% block page_title %}Вакансии{% endblock %}
+{% block content %}
+  <h1>Поиск вакансий</h1>
+  {% if llm_note %}<p class="note">{{ llm_note }}</p>{% endif %}
+  {% if error %}
+  <p class="alert-err">{{ error }}</p>
+  <a class="btn secondary" href="{{ url_for('results') }}">Назад</a>
+  {% else %}
+  <p id="status-line"><span class="spinner"></span>Запуск…</p>
+  <p id="resource-metrics" class="muted" style="margin:.2rem 0 .6rem;">
+    Сеть: 0 запросов, ожидание 0.00 с · LLM: 0 запросов, ожидание 0.00 с
+  </p>
+
+  {% if run and not run.done %}
+  <form id="cancel-form" method="post"
+        action="{{ url_for('pipeline_cancel', run_id=run.run_id) }}"
+        style="margin:.4rem 0 .9rem;">
+    <button type="submit" class="btn danger small">Отменить прогон</button>
+  </form>
+  {% endif %}
+
+  <div id="steps">
+    {% for s in run.steps %}
+    <div class="step" data-index="{{ loop.index0 }}">
+      <h2><code>{{ s.cmd }}</code><span class="badge queued">в очереди</span></h2>
+      <pre class="term" style="max-height:260px;"></pre>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="error-box"></div>
+  <div id="actions" style="display:none;margin-top:1rem;">
+    <a class="btn secondary" href="{{ url_for('results') }}">Назад</a>
+    <a class="btn" href="{{ url_for('results') }}">К результатам</a>
+  </div>
+  {% endif %}
+
+  {% if run %}
+  <script>
+    const statusUrl = {{ url_for('pipeline_status', run_id=run.run_id) | tojson }};
+    const steps = Array.from(document.querySelectorAll('.step'));
+    const cursors = steps.map(() => 0);
+    const statusLine = document.getElementById('status-line');
+    const resourceMetrics = document.getElementById('resource-metrics');
+    const errorBox = document.getElementById('error-box');
+    const actions = document.getElementById('actions');
+    const cancelForm = document.getElementById('cancel-form');
+    let timer;
+
+    function render(data) {
+      const metrics = data.metrics || {};
+      resourceMetrics.textContent =
+        'Сеть: ' + (metrics.network_requests || 0) +
+        ' запросов, ожидание ' + Number(metrics.network_wait_seconds || 0).toFixed(2) +
+        ' с · LLM: ' + (metrics.llm_requests || 0) +
+        ' запросов, ожидание ' + Number(metrics.llm_wait_seconds || 0).toFixed(2) +
+        ' с · Векторы: ' + (metrics.embedding_requests || 0) +
+        ' запросов, ожидание ' + Number(metrics.embedding_wait_seconds || 0).toFixed(2) + ' с';
+      data.steps.forEach((s, i) => {
+        const el = steps[i];
+        if (!el) return;
+        const badge = el.querySelector('.badge');
+        const pre = el.querySelector('pre');
+        if (s.code === null) {
+          const firstPending = data.steps.findIndex(step => step.code === null);
+          const running = data.status === 'running' && i === firstPending;
+          const waiting = data.status === 'waiting_rate_limit' && i === firstPending;
+          badge.textContent = waiting ? 'ожидание лимита LLM…' : (running ? 'выполняется…' : 'в очереди');
+          badge.className = 'badge ' + (waiting ? 'waiting' : (running ? 'running' : 'queued'));
+        } else {
+          if (s.code === 0 && s.warning) {
+            badge.textContent = 'частичный успех';
+            badge.className = 'badge warn';
+            badge.title = s.warning;
+          } else {
+            badge.textContent = s.code === 0 ? 'готово' : 'ошибка (код ' + s.code + ')';
+            badge.className = 'badge ' + (s.code === 0 ? 'ok' : 'err');
+          }
+        }
+        const chunk = s.output || "";
+        if (chunk) {
+          const atBottom = pre.scrollHeight - pre.scrollTop - pre.clientHeight < 40;
+          if (s.output_reset) {
+            pre.textContent = chunk;
+          } else {
+            pre.textContent += chunk;
+          }
+          if (atBottom) pre.scrollTop = pre.scrollHeight;
+        }
+        if (typeof s.output_cursor === 'number') cursors[i] = s.output_cursor;
+      });
+      if (data.done) {
+        statusLine.textContent = data.error ? 'Завершено с ошибкой' : 'Завершено';
+        if (data.error) {
+          errorBox.innerHTML = '';
+          const box = document.createElement('div');
+          box.className = 'alert-err';
+          box.textContent = data.error;
+          errorBox.appendChild(box);
+        }
+        actions.style.display = 'block';
+        if (cancelForm) cancelForm.style.display = 'none';
+        clearInterval(timer);
+      } else {
+        statusLine.innerHTML = data.status === 'waiting_rate_limit'
+          ? '<span class="spinner"></span>Ожидание лимита внешней модели…'
+          : '<span class="spinner"></span>Выполняется…';
+      }
+    }
+
+    async function poll() {
+      try {
+        const r = await fetch(statusUrl + '?cursor=' + cursors.join(','));
+        render(await r.json());
+      } catch (e) {
+        /* сеть недоступна — попробуем на следующем тике */
+      }
+    }
+
+    timer = setInterval(poll, 1500);
+    poll();
+  </script>
+  {% endif %}
+{% endblock %}

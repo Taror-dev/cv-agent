@@ -1,0 +1,83 @@
+# Synthetic seed, NOT human validation of real vacancy relevance.
+# Grades are independently authored scenario expectations: 2 suitable, 1 borderline, 0 unsuitable.
+version: 1
+label_source: synthetic_scenario_expectations
+profiles:
+  python:
+    documents:
+      - {id: python-cv, kind: cv, text: "Python, SQL, Docker, REST API\nDeutsch B2\nEnglisch B2\nBachelor abgeschlossen"}
+  java:
+    documents:
+      - {id: java-cv, kind: cv, text: "Java, Spring Boot, PostgreSQL, REST API\nDeutsch B1\nEnglisch C1\nBachelor abgeschlossen"}
+  frontend:
+    documents:
+      - {id: frontend-cv, kind: cv, text: "JavaScript, TypeScript, React\nDeutsch B2\nEnglisch B2\nAusbildung abgeschlossen"}
+  data:
+    documents:
+      - {id: data-cv, kind: cv, text: "Python, SQL, PostgreSQL, Machine Learning\nDeutsch C1\nEnglisch C1\nMaster abgeschlossen"}
+  operations:
+    documents:
+      - {id: operations-cv, kind: cv, text: "Linux, Docker, Kubernetes, Git\nDeutsch C1\nEnglisch B2\nAusbildung abgeschlossen"}
+  learner:
+    documents:
+      - {id: learner-cv, kind: cv, text: "Excel\nDeutsch B1\nEnglisch B1\nAusbildung abgeschlossen"}
+      - {id: learner-course, kind: curriculum, text: "Python, JavaScript, RAG\nMachine Learning\nREST API"}
+vacancies:
+  backend:
+    group: backend
+    split: calibration
+    title: Python Backendentwickler
+    text: "Anforderungen:\nPython erforderlich.\nSQL erforderlich.\nDocker erforderlich.\nDeutsch B2 erforderlich."
+  java_backend:
+    group: java_backend
+    split: calibration
+    title: Java Softwareentwickler
+    text: "Ihr Profil:\nJava erforderlich.\nSpring Boot erforderlich.\nPostgres erforderlich.\nDeutsch B2 erforderlich."
+  frontend:
+    group: frontend
+    split: calibration
+    title: Frontend Developer
+    text: "Requirements:\nJavaScript required.\nTypeScript required.\nReact required.\nEnglish B2 required."
+  data_science:
+    group: data_science
+    split: calibration
+    title: Data Scientist
+    text: "Dein Profil:\nPython erforderlich.\nSQL erforderlich.\nMaschinelles Lernen erforderlich.\nDeutsch C1 erforderlich.\nPostgreSQL wünschenswert."
+  devops:
+    group: devops
+    split: calibration
+    title: DevOps Engineer
+    text: "Requirements:\nLinux required.\nDocker required.\nKubernetes required.\nEnglish B2 required."
+  junior_python:
+    group: junior_python
+    split: calibration
+    title: Junior Python Entwickler
+    text: "Dein Profil:\nPython Kenntnisse wünschenswert.\nDeutsch B1 erforderlich.\nKeine Berufserfahrung erforderlich.\nWir bieten:\nJava Schulungen"
+  integration:
+    group: integration
+    split: holdout
+    title: Integrationsentwickler
+    text: "Anforderungen:\nJava Kenntnisse erforderlich.\nREST-Schnittstellen erforderlich.\nDeutsch B1 erforderlich."
+  sql_support:
+    group: sql_support
+    split: holdout
+    title: SQL Application Support
+    text: "Requirements:\nSQL required.\nEnglish B2 required.\nDocker preferred."
+  office:
+    group: office
+    split: holdout
+    title: Büromitarbeiter
+    text: "Ihr Profil:\nExcel Kenntnisse erforderlich.\nDeutsch B2 erforderlich.\nWir bieten:\nPython Schulungen"
+  rag:
+    group: rag
+    split: holdout
+    title: RAG Engineer
+    text: "Требования:\nPython требуется.\nRAG требуется.\nMachine Learning требуется.\nEnglisch B2 требуется."
+# Explicit matrix; no grades are generated from dictionary/LLM scores.
+judgments:
+  python:     {backend: 2, java_backend: 0, frontend: 0, data_science: 1, devops: 0, junior_python: 2, integration: 1, sql_support: 2, office: 0, rag: 1}
+  java:       {backend: 0, java_backend: 1, frontend: 0, data_science: 0, devops: 0, junior_python: 1, integration: 2, sql_support: 0, office: 0, rag: 0}
+  frontend:   {backend: 0, java_backend: 0, frontend: 2, data_science: 0, devops: 0, junior_python: 1, integration: 0, sql_support: 0, office: 0, rag: 0}
+  data:       {backend: 1, java_backend: 0, frontend: 0, data_science: 2, devops: 0, junior_python: 2, integration: 0, sql_support: 2, office: 0, rag: 1}
+  operations: {backend: 0, java_backend: 0, frontend: 0, data_science: 0, devops: 2, junior_python: 0, integration: 0, sql_support: 0, office: 0, rag: 0}
+  learner:    {backend: 0, java_backend: 0, frontend: 0, data_science: 0, devops: 0, junior_python: 1, integration: 0, sql_support: 0, office: 1, rag: 0}

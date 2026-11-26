@@ -1,0 +1,50 @@
+{
+  "backend": {
+    "model": "qwen3-embedding:0.6b",
+    "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "dimensions": 1024,
+    "base_url": "http://127.0.0.1:11434",
+    "query_prefix": "Instruct: Given a job responsibility, retrieve candidate experience passages describing similar work.\nQuery: ",
+    "document_prefix": "",
+    "num_ctx": 4096,
+    "preparation_version": "embeddings.v1"
+  },
+  "passed": true,
+  "elapsed_seconds": 16.111,
+  "results": [
+    {
+      "query": "Entwicklung von REST APIs zur Integration von Geschäftssystemen.",
+      "expected": 0,
+      "nearest": 0,
+      "similarities": [
+        0.7639162168671659,
+        0.34246856179743695,
+        0.4126732919182353
+      ],
+      "passed": true
+    },
+    {
+      "query": "Разработка API для интеграции бизнес-приложений.",
+      "expected": 0,
+      "nearest": 0,
+      "similarities": [
+        0.632083903018994,
+        0.3129113396365879,
+        0.3755254928367987
+      ],
+      "passed": true
+    },
+    {
+      "query": "Administration of Linux servers and deployment with Docker.",
+      "expected": 2,
+      "nearest": 2,
+      "similarities": [
+        0.2908648608160079,
+        0.28172562760085135,
+        0.803990103142509
+      ],
+      "passed": true
+    }
+  ],
+  "limitations": "Synthetic transport/retrieval smoke only; not validation of vacancy score quality."
+}

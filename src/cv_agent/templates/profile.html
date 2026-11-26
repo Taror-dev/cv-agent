@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% block title %}Профиль – CV-Агент{% endblock %}
+{% block page_title %}Профиль{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>{{ name }}</h1>
+  </div>
+
+  <div class="layout">
+    <aside class="menu">
+      <button type="button" data-section="profile">Профиль</button>
+      <button type="button" data-section="keywords">Ключевые слова</button>
+      <button type="button" data-section="documents">Документы</button>
+      <button type="button" data-section="llm">LLM модель</button>
+      <button type="button" data-section="keys">API keys</button>
+      <a href="{{ url_for('results') }}">Вакансии</a>
+    </aside>
+
+    <main class="content">
+      <section data-section="profile" {{ '' if active_section == 'profile' else 'hidden' }}>
+        <div id="profile-view">
+          <p><strong>Полное имя:</strong> {{ candidate_profile.full_name or '—' }}</p>
+          <p><strong>Адрес:</strong> <span style="white-space:pre-line">{{ candidate_profile.address or '—' }}</span></p>
+          <p><strong>E-mail:</strong> {{ candidate_profile.email or '—' }}</p>
+          <p><strong>Телефон:</strong> {{ candidate_profile.phone or '—' }}</p>
+          <p><strong>Языки:</strong> {{ candidate_profile.languages|join(', ') if candidate_profile.languages else '—' }}</p>
+          <p><strong>Язык Anschreiben:</strong> {{ {'de': 'Deutsch', 'en': 'English', 'ru': 'Русский'}.get(candidate_profile.preferred_letter_language, '—') }}</p>
+          <p><strong>Регион поиска:</strong> {{ candidate_profile.search_region or '—' }}</p>
+          <p><strong>Город для резюме:</strong> {{ candidate_profile.resume_city or '—' }}</p>
+          <p><strong>Формат для оценки вакансий:</strong> {{ {'unspecified':'Не задан', 'any':'Любой', 'remote':'Полностью удалённо', 'hybrid':'Гибридный', 'onsite':'Только на месте'}.get(candidate_profile.scoring_preferences.work_mode, 'Не задан') }}</p>
+          <p><strong>Города для оценки вакансий:</strong> {{ candidate_profile.scoring_preferences.cities|join(', ') or 'Не ограничены, если выбран формат работы' }}</p>
+          <button type="button" id="edit-profile-btn" class="btn">Редактировать</button>
+        </div>
+
+        <form id="profile-edit-form" method="post" action="{{ url_for('profile_details') }}" hidden>
+          <div class="form-grid">
+            <div>
+              <label for="full_name">Полное имя</label>
+              <input type="text" name="full_name" id="full_name" maxlength="200" value="{{ candidate_profile.full_name }}">
+            </div>
+            <div>
+              <label for="email">E-mail</label>
+              <input type="email" name="email" id="email" maxlength="320" value="{{ candidate_profile.email }}">
+            </div>
+            <div>
+              <label for="phone">Телефон</label>
+              <input type="text" name="phone" id="phone" maxlength="100" value="{{ candidate_profile.phone }}">
+            </div>
+            <div>
+              <label for="languages">Языки (через запятую)</label>
+              <input type="text" name="languages" id="languages" maxlength="1000" value="{{ candidate_profile.languages|join(', ') }}">
+            </div>
+            <div>
+              <label for="preferred_letter_language">Язык Anschreiben</label>
+              <select name="preferred_letter_language" id="preferred_letter_language">
+                <option value="de"{{ ' selected' if candidate_profile.preferred_letter_language == 'de' else '' }}>Deutsch</option>
+                <option value="en"{{ ' selected' if candidate_profile.preferred_letter_language == 'en' else '' }}>English</option>
+                <option value="ru"{{ ' selected' if candidate_profile.preferred_letter_language == 'ru' else '' }}>Русский</option>
+              </select>
+            </div>
+            <div>
+              <label for="search_region">Регион поиска</label>
+              <input type="text" name="search_region" id="search_region" maxlength="300"
+                     value="{{ candidate_profile.search_region }}"
+                     placeholder="Например: 88239 Wangen im Allgäu">
+            </div>
+            <div>
+              <label for="resume_city">Город для резюме</label>
+              <input type="text" name="resume_city" id="resume_city" maxlength="120"
+                     value="{{ candidate_profile.resume_city }}"
+                     placeholder="Например: Wangen im Allgäu">
+            </div>
+            <div class="full">
+              <label for="scoring_work_mode">Предпочтительный формат для алгоритмической оценки</label>
+              <select name="scoring_work_mode" id="scoring_work_mode">
+                {% for mode, label in [('unspecified','Не задан — требуется проверка'), ('any','Любой формат'), ('remote','Полностью удалённо'), ('hybrid','Гибридный'), ('onsite','Только на месте')] %}
+                <option value="{{ mode }}"{{ ' selected' if candidate_profile.scoring_preferences.work_mode == mode else '' }}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="full">
+              <label for="scoring_cities">Допустимые города для оценки (через запятую, до 20)</label>
+              <input type="text" name="scoring_cities" id="scoring_cities" maxlength="2500"
+                     value="{{ candidate_profile.scoring_preferences.cities|join(', ') }}" placeholder="Например: Wangen im Allgäu, Ravensburg">
+              <p class="muted">Если выбран формат работы, пустой список означает, что города не ограничены. При заданном списке проверяется точное совпадение с местом вакансии, в том числе удалённой. Радиус, расстояние и возможность работать удалённо из другой страны требуют ручной проверки. Эти предпочтения влияют на оценку, параметры поиска задаются отдельно.</p>
+            </div>
+            <div class="full">
+              <label for="address">Адрес</label>
+              <textarea name="address" id="address" maxlength="1000" rows="3">{{ candidate_profile.address }}</textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn">Сохранить данные</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Ключевые слова -->
+      <section data-section="keywords" {{ '' if active_section == 'keywords' else 'hidden' }}>
+        <form method="post" action="{{ url_for('profile_keywords_generate') }}" style="margin:0;">
+          <button type="submit" class="btn small">Сгенерировать из документов</button>
+        </form>
+        {% if account_keywords %}
+        <ul class="kw-list">
+          {% for kw in account_keywords %}
+          <li>
+            <span>{{ kw }}</span>
+            <form method="post" action="{{ url_for('profile_keywords_delete') }}" style="margin:0;">
+              <input type="hidden" name="keyword" value="{{ kw }}">
+              <button type="submit" class="btn small danger">Удалить</button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">Пока не сгенерированы — их можно собрать из ваших документов.</p>
+        {% endif %}
+        <div class="btn-row">
+          <button type="button" id="add-kw-btn" class="btn">Добавить</button>
+        </div>
+        <form id="add-kw-form" method="post" action="{{ url_for('profile_keywords_add') }}" hidden>
+          <label for="new-keyword">Новое ключевое слово</label>
+          <input type="text" name="keyword" id="new-keyword" maxlength="100" autocomplete="off">
+          <div class="btn-row">
+            <button type="submit" class="btn small">Добавить</button>
+            <button type="button" id="cancel-kw-btn" class="btn small">Отмена</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Документы -->
+      <section data-section="documents" {{ '' if active_section == 'documents' else 'hidden' }}>
+        {% if docs %}
+        <ul class="docs">
+          {% for d in docs %}
+          <li>
+            <div class="doc-main">
+              <strong>{{ d.filename }}</strong>
+              <div class="doc-meta">
+                {{ d.mime_type }}, {{ d.size_bytes }} байт · извлечено {{ d.extracted_chars }} симв. ·
+                {% if d.used %}<span class="badge ok">в контекст входит {{ d.included_chars }}</span>
+                {% else %}<span class="badge">в текущий контекст не входит</span>{% endif %}
+              </div>
+              {% if d.extract_error %}<div class="doc-error">{{ d.extract_error }}</div>{% endif %}
+            </div>
+            <div class="doc-actions">
+              <form method="post" action="{{ url_for('profile_delete', name=d.filename) }}" style="margin:0;">
+                <button type="submit" class="btn small danger">Удалить</button>
+              </form>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">Документов пока нет — загрузите CV, чтобы агент мог оценивать вакансии и писать письма.</p>
+        {% endif %}
+        <hr class="sep">
+        <form method="post" action="{{ url_for('profile_upload') }}" enctype="multipart/form-data">
+          <label for="docs">Файлы (PDF с текстовым слоем, TXT или MD; максимум 10 МБ)</label>
+          <input type="file" name="docs" id="docs" multiple>
+          <div class="btn-row"><button type="submit" class="btn">Загрузить</button></div>
+        </form>
+      </section>
+
+      <!-- LLM модель -->
+      <section data-section="llm" {{ '' if active_section == 'llm' else 'hidden' }}>
+        <p style="margin:.1rem 0 .6rem;"><strong>Сохраненная модель:</strong> {{ current_llm }}</p>
+
+        <div class="limits" style="margin-top:.8rem;">
+          <div class="limits-title">Лимиты:</div>
+          {% if limits_stamp %}<div class="limits-stamp">Данные от {{ limits_stamp }}</div>{% endif %}
+          {% if limits_rows %}
+          <ul class="limits-list">
+            {% for row in limits_rows %}
+            <li><span class="limits-label">{{ row.label }}:</span> {{ row.value }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="limits-stamp">-</div>
+          {% endif %}
+        </div>
+
+        <form method="post" action="{{ url_for('profile_llm') }}">
+          <div class="form-grid">
+            <div>
+              <label for="llm-provider">Провайдер</label>
+              <select id="llm-provider">
+                <option value="ollama"{% if not ollama_up %} disabled class="provider-disabled"{% endif %}>Ollama</option>
+                <option value="gemini">Gemini</option>
+                <option value="groq">Groq</option>
+              </select>
+            </div>
+            <div>
+              <label for="preferred_llm">Модель</label>
+              <select name="llm" id="preferred_llm" data-saved="{{ preferred_llm }}" data-provider="{{ preferred_provider }}"></select>
+            </div>
+          </div>
+          <div class="btn-row"><button type="submit" class="btn">Сохранить модель</button></div>
+        </form>
+      </section>
+
+      <!-- API keys -->
+      <section data-section="keys" {{ '' if active_section == 'keys' else 'hidden' }}>
+        {% for k in api_keys %}
+        <div class="key-row">
+          <span class="key-name">{{ k.name }}</span>
+          <form method="post" action="{{ url_for('profile_keys_delete') }}" style="margin:0;">
+            <input type="hidden" name="name" value="{{ k.name }}">
+            <button type="submit" class="btn small danger">Удалить</button>
+          </form>
+        </div>
+        {% endfor %}
+        <button type="button" id="add-key-btn" class="btn" style="margin-top:1rem;">Добавить</button>
+        <form id="add-key-form" method="post" action="{{ url_for('profile_keys_add') }}" hidden>
+          <div class="form-grid">
+            <div>
+              <label for="key-name">Название</label>
+              <input type="text" name="name" id="key-name" maxlength="100" autocomplete="off">
+            </div>
+            <div>
+              <label for="key-provider">Провайдер</label>
+              <select name="provider" id="key-provider">
+                <option value="gemini">Gemini</option>
+                <option value="groq">Groq</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="key-value">API key</label>
+              <input type="password" name="api_key" id="key-value" autocomplete="off">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn small">Добавить</button>
+            <button type="button" id="cancel-key-btn" class="btn small">Отмена</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div class="toasts">
+    {% if message %}<p class="msg alert-ok">{{ message }}</p>{% endif %}
+    {% if error %}<p class="err alert-err">{{ error }}</p>{% endif %}
+  </div>
+
+  <script>
+    setTimeout(function () {
+      document.querySelectorAll('.msg, .err').forEach(function (el) {
+        el.style.transition = 'opacity .4s ease';
+        el.style.opacity = '0';
+        setTimeout(function () { el.remove(); }, 400);
+      });
+    }, 3000);
+  </script>
+
+    <script>
+    (function () {
+      var buttons = document.querySelectorAll('aside.menu button');
+      var sections = document.querySelectorAll('main.content > section');
+      function show(id) {
+        sections.forEach(function (s) { s.hidden = s.dataset.section !== id; });
+        buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.section === id); });
+        ['add-key-form', 'add-kw-form'].forEach(function (fid) {
+          var f = document.getElementById(fid);
+          if (f && !f.hidden) { f.hidden = true; f.reset(); }
+        });
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () { show(b.dataset.section); });
+      });
+      show('{{ active_section|default("profile") }}');
+
+      var editBtn = document.getElementById('edit-profile-btn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function () {
+          document.getElementById('profile-view').hidden = true;
+          document.getElementById('profile-edit-form').hidden = false;
+        });
+      }
+    })();
+  </script>
+  <script>
+    (function () {
+      var groups = {{ llm_groups|tojson }};
+      var providerSel = document.getElementById('llm-provider');
+      var modelSel = document.getElementById('preferred_llm');
+      if (!providerSel || !modelSel) return;
+      var savedId = modelSel.dataset.saved || '';
+      var savedProvider = modelSel.dataset.provider || '';
+
+      function fillModels() {
+        var models = groups[providerSel.value] || [];
+        modelSel.innerHTML = '';
+        models.forEach(function (o) {
+          var opt = document.createElement('option');
+          opt.value = o.id;
+          opt.textContent = o.label;
+          modelSel.appendChild(opt);
+        });
+        if (savedId && models.some(function (o) { return o.id === savedId; })) {
+          modelSel.value = savedId;
+        }
+      }
+
+      var initial = null;
+      Array.prototype.forEach.call(providerSel.options, function (opt) {
+        if (initial === null && !opt.disabled) initial = opt.value;
+      });
+      var savedOpt = providerSel.querySelector(
+        'option[value="' + savedProvider + '"]'
+      );
+      if (savedProvider && savedOpt && !savedOpt.disabled
+          && (groups[savedProvider] || []).length) {
+        initial = savedProvider;
+      }
+      if (initial !== null) providerSel.value = initial;
+
+      fillModels();
+      providerSel.addEventListener('change', fillModels);
+    })();
+
+    (function () {
+      var btn = document.getElementById('add-key-btn');
+      var form = document.getElementById('add-key-form');
+      var cancelBtn = document.getElementById('cancel-key-btn');
+      if (!btn || !form) return;
+      btn.addEventListener('click', function () {
+        form.hidden = !form.hidden;
+        if (!form.hidden) form.querySelector('input').focus();
+      });
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function () {
+          form.hidden = true;
+          form.reset();
+        });
+      }
+    })();
+
+    (function () {
+      var addBtn = document.getElementById('add-kw-btn');
+      var form = document.getElementById('add-kw-form');
+      var cancelBtn = document.getElementById('cancel-kw-btn');
+      if (!addBtn || !form || !cancelBtn) return;
+      addBtn.addEventListener('click', function () {
+        form.hidden = false;
+        form.querySelector('input').focus();
+      });
+      cancelBtn.addEventListener('click', function () {
+        form.hidden = true;
+        form.reset();
+      });
+    })();
+  </script>
+  {% endblock %}

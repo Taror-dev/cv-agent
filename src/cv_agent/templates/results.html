@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Вакансии – CV-Агент{% endblock %}
+{% block body_class %}wide{% endblock %}
+{% block page_title %}Вакансии{% endblock %}
+{% block content %}
+  <form class="new-search card" method="post" action="{{ url_for('pipeline') }}">
+    <div class="limit-field form-grid" style="--cols:2;">
+      <div>
+        <label for="limit">Общий лимит вакансий за поиск</label>
+        <input type="number" name="limit" id="limit" value="{{ search_total_limit }}" min="1" max="500">
+      </div>
+      <div>
+        <label for="radius">Радиус поиска (км)</label>
+        <input type="number" name="radius" id="radius" value="{{ search_radius }}" min="1" max="500"
+               placeholder="Например: 50">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label for="country">Страна</label>
+        <input type="text" name="country" id="country" maxlength="300" value="{{ search_form.country }}"
+               placeholder="Например: Deutschland, USA">
+      </div>
+      <div>
+        <label for="region">Регион</label>
+        <input type="text" name="region" id="region" maxlength="300" value="{{ search_form.region }}"
+               placeholder="Например: Bayern, Baden-Württemberg">
+      </div>
+      <div>
+        <label for="city">Город</label>
+        <input type="text" name="city" id="city" maxlength="300" value="{{ search_form.city }}"
+               placeholder="Например: Wangen im Allgäu, München">
+      </div>
+    </div>
+    <p class="muted" style="font-size:.85rem;margin:.35rem 0 0;">
+      Локации можно перечислять через запятую — поиск выполнится по каждой.
+      При заполнении нескольких полей используется самое конкретное
+      (город → регион → страна). Радиус применяется к выбранному городу/региону.
+    </p>
+
+    <div style="margin-top:1rem;display:flex;justify-content:space-between;gap:.6rem;">
+      <button type="submit" class="btn">Искать новые вакансии</button>
+      <button
+        type="submit"
+        class="btn"
+        formaction="{{ url_for('actualize') }}"
+      >Актуализировать текущие вакансии</button>
+    </div>
+  </form>
+
+  {% if score_errors %}
+  <p class="alert-err">У {{ score_errors }} вакансий не удалось рассчитать оценку. Они доступны для повторной оценки.</p>
+  {% endif %}
+
+  <p class="muted">Оценка показывает соответствие критериям, а не вероятность найма. Метка «Предварительная» означает, что часть данных требует проверки; отсутствие навыка в документах не доказывает его отсутствие. Баллы ИИ и алгоритма рассчитаны разными способами.</p>
+
+  {% if active_filters %}
+  <p class="filter-reset">
+    Фильтры активны.
+    <a href="{{ url_for('results') }}">Сбросить все фильтры</a>
+  </p>
+  {% endif %}
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="num">№</th>
+          <th class="filterable{% if 'refnr' in active_filters %} filtered{% endif %}" data-filter="refnr">Идентификатор<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'title' in active_filters %} filtered{% endif %}" data-filter="title">Название<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'company' in active_filters %} filtered{% endif %}" data-filter="company">Компания<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'location' in active_filters %} filtered{% endif %}" data-filter="location">Место<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'source' in active_filters %} filtered{% endif %}" data-filter="source">Источник<span class="f-icon">▾</span></th>
+          <th class="num filterable{% if 'score' in active_filters %} filtered{% endif %}" data-filter="score">Оценка<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'engine' in active_filters %} filtered{% endif %}" data-filter="engine">Способ оценки<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'desc' in active_filters %} filtered{% endif %}" data-filter="desc">Описание<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'transl' in active_filters %} filtered{% endif %}" data-filter="transl">Перевод<span class="f-icon">▾</span></th>
+          <th class="filterable{% if 'letter' in active_filters %} filtered{% endif %}" data-filter="letter">Anschreiben<span class="f-icon">▾</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td class="num row-number">{{ start + loop.index }}</td>
+          <td class="wrap-anywhere"><a href="{{ url_for('vacancy', refnr=r[0]) }}">{{ r[0] }}</a></td>
+          <td>{{ r[1] }}</td>
+          <td>{{ r[2] | company_name }}</td>
+          <td>{{ r[8] or '–' }}</td>
+          <td>{{ r[3] }}</td>
+          <td class="num score">
+            {%- if r[4] is not none -%}
+              <span class="score-bar" style="width:{{ '%.0f'|format(r[4]) }}px;"></span>{{ '%.0f'|format(r[4]) }}
+            {%- elif r[6] == 'score_error' -%}
+              <span class="badge err">ошибка оценки</span>
+            {%- elif r[7] -%}
+              <span class="badge warn">{{ r[7] }}</span>
+            {%- else -%}
+              –
+            {%- endif -%}
+          </td>
+          <td class="score-method">
+            {% set summary = score_summaries.get(r[0], {}) %}
+            {% if r[4] is not none or r[6] == 'score_error' %}
+              {% if summary.get('engine') == 'algorithmic' %}
+              <span class="badge">Алгоритм</span>
+              {% if r[4] is not none and summary.get('preliminary', true) %}<span class="badge warn">Предварительная</span>{% endif %}
+              {% else %}<span class="badge">ИИ</span>{% endif %}
+            {% else %}–{% endif %}
+          </td>
+          <td class="presence">{% if r[9] %}<span class="check" title="Описание загружено">✔</span>{% else %}<span class="nocheck" title="Нет описания">–</span>{% endif %}</td>
+          <td class="presence">{% if r[10] %}<span class="check" title="Перевод готов">✔</span>{% else %}<span class="nocheck" title="Нет перевода">–</span>{% endif %}</td>
+          <td class="presence">{% if r[5] in ('prepared', 'applied') %}<span class="check" title="Anschreiben создано">✔</span>{% else %}<span class="nocheck" title="Anschreiben не создано">–</span>{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="11">
+          <div class="empty-state">
+            {% if active_filters %}
+            Ничего не найдено по заданным фильтрам.
+            <br><a class="btn small" href="{{ url_for('results') }}">Сбросить фильтры</a>
+            {% else %}
+            Вакансий нет. Сначала выполните команду «search».
+            <br><a class="btn small" href="{{ url_for('results') }}">Обновить страницу</a>
+            {% endif %}
+          </div>
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pages > 1 %}
+  <nav class="pagination" aria-label="Страницы вакансий">
+    {% if page > 1 %}
+      <a class="page-link" href="{{ url_for('results', page=page - 1, **active_filters_param) }}">← Назад</a>
+    {% else %}
+      <span class="page-link disabled">← Назад</span>
+    {% endif %}
+
+    <div class="page-numbers">
+      {%- for p in range(1, pages + 1) -%}
+        {%- if p == page -%}
+          <span class="page-link current">{{ p }}</span>
+        {%- else -%}
+          <a class="page-link" href="{{ url_for('results', page=p, **active_filters_param) }}">{{ p }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {% if page < pages %}
+      <a class="page-link" href="{{ url_for('results', page=page + 1, **active_filters_param) }}">Вперёд →</a>
+    {% else %}
+      <span class="page-link disabled">Вперёд →</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script type="application/json" id="filter-config">{{ filter_config | tojson }}</script>
+<script src="{{ url_for('static', filename='filters.js') }}"></script>
+{% endblock %}

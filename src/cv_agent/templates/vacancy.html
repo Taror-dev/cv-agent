@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}{{ v.title or 'Вакансия' }} – CV-Агент{% endblock %}
+{% block page_title %}Вакансии{% endblock %}
+{% block content %}
+  {% if v is none %}
+  <div class="card">
+    <h1>Вакансия {{ refnr }} не найдена</h1>
+    <a class="btn secondary" href="{{ url_for('results') }}">← К результатам</a>
+  </div>
+  {% else %}
+  <div class="page-head">
+    <h1>{{ v.title }}</h1>
+  </div>
+
+  <div class="chips" style="margin-bottom:.9rem;">
+    <span class="chip">Компания <strong>{{ v.company | company_name }}</strong></span>
+    <span class="chip">Место <strong>{{ v.location or '—' }}</strong></span>
+    <span class="chip">Источник <strong>{{ v.source }}</strong></span>
+    <span class="chip">Номер <strong>{{ v.refnr }}</strong></span>
+    <span class="chip">Оценка
+      {% if v.score is not none %}<strong>{{ '%.0f'|format(v.score) }} / 100</strong>
+      {% elif v.score_state == 'score_error' %}<strong class="err-text" style="color:var(--err-text);">ошибка оценки</strong>
+      {% else %}<strong>—</strong>{% endif %}
+    </span>
+  </div>
+
+  {% if score_details and score_details.engine == 'algorithmic' and score_details.state == 'scored' %}
+  <section class="card" style="margin-bottom:1rem;">
+    <h2>Алгоритмическая оценка</h2>
+    {% set report = score_details.details %}
+    <p>Оценка по правилам и сходству задач. Это не вероятность найма. Неупомянутый навык не считается отсутствующим.</p>
+    {% if report.preliminary %}<p>Часть требований не подтверждена или ещё не проверяется алгоритмом. Нужна ручная проверка.</p>{% endif %}
+    <table>
+      <thead><tr><th>Компонент</th><th>Соответствие</th><th>Вклад в балл</th></tr></thead>
+      <tbody>{% for key, component in report.components.items() %}
+        <tr><td>{{ {'skills':'Навыки','tasks':'Задачи','qualifications':'Языки, образование и стаж','location':'Регион и формат работы'}[key] }}</td><td>{{ '%.0f'|format(component.value * 100) }} %{% if component.state == 'unknown' %} — не проверено{% elif component.state == 'semantic' %} — сходство задач{% endif %}</td><td>{% if component.points is defined %}{{ '%.2f'|format(component.points) }} из {{ '%.0f'|format(component.weight * 100) }}{% else %}—{% endif %}</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% if report.cap_applied %}<p>Сумма компонентов: {{ report.uncapped_score }}. Итог ограничен до {{ report.score }} из-за подтверждённого несоответствия обязательному требованию.</p>{% endif %}
+    {% for match in report.matches %}
+      <p>{{ match.explanation }}</p>
+      {% for evidence in match.evidence %}<blockquote>{{ evidence.text }}</blockquote>{% endfor %}
+    {% endfor %}
+    {% if report.components.get('location', {}).get('checks') %}
+    <details><summary>Регион и формат работы</summary>
+      {% for check in report.components.location.checks %}
+      <p>{{ check.explanation }} — {{ {'confirmed':'подтверждено','mismatch':'несоответствие','unknown':'нужна проверка','conflict':'противоречивые данные'}.get(check.status, 'нужна проверка') }}</p>
+      {% for excerpt in check.evidence %}<blockquote>{{ excerpt }}</blockquote>{% endfor %}
+      {% endfor %}
+      <p class="muted">Расстояние, радиус и право работать удалённо из конкретной страны здесь не проверяются.</p>
+    </details>
+    {% endif %}
+    {% if report.missing %}<ul>{% for item in report.missing %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+    {% if report.task_matches %}
+      <details><summary>Похожие задачи из резюме</summary>
+      {% for match in report.task_matches %}<p>{{ match.task.text }}</p><blockquote>{{ match.evidence.text }}</blockquote><p>Сходство: {{ '%.2f'|format(match.similarity) }}. Смысловое сходство не подтверждает отдельные квалификации.</p>{% endfor %}
+      </details>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if score_history %}
+  <details class="card" style="margin-bottom:1rem;">
+    <summary>История оценок</summary>
+    <p class="muted">Последние сохранённые расчёты. Документы, описание и настройки могли отличаться; баллы разных методов не являются эквивалентными.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Дата (UTC)</th><th>Метод</th><th>Оценка</th><th>Модель / версия</th></tr></thead>
+      <tbody>{% for entry in score_history %}
+      <tr><td>{{ entry.created_at }}</td><td>{{ 'Алгоритм' if entry.engine == 'algorithmic' else 'ИИ' }}</td><td>{{ '%.2f'|format(entry.score) }}</td><td>{{ entry.model }} / {{ entry.version }}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+  </details>
+  {% endif %}
+
+  {% if v.url and v.url|safe_external_url %}
+  <p><a href="{{ v.url }}" target="_blank" rel="noopener">Открыть оригинал объявления ↗</a></p>
+  {% endif %}
+
+  {% if message %}<p class="alert-ok">{{ message }}</p>{% endif %}
+  {% if error %}<p class="alert-err">{{ error }}</p>{% endif %}
+
+  <div class="split-grid">
+    <section class="card">
+      <div class="head-row" style="margin-bottom:.6rem;">
+        <h2>Описание</h2>
+        <button type="button" class="btn" data-edit-toggle="description">
+          {% if v.description %}Редактировать описание{% else %}Добавить описание{% endif %}
+        </button>
+      </div>
+      <pre class="term" data-view="description">{{ v.description or 'Описание отсутствует.' }}</pre>
+      <div data-editor="description" hidden>
+        <form method="post" action="{{ url_for('edit_vacancy_text', refnr=v.refnr) }}">
+          <input type="hidden" name="field" value="description">
+          <textarea name="text" rows="12">{{ v.description or '' }}</textarea>
+          <p>
+            <button type="submit" class="btn small">Сохранить описание</button>
+            <button type="button" class="btn small" data-edit-cancel="description">Отмена</button>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head-row" style="margin-bottom:.6rem;">
+        <h2>Перевод</h2>
+        <div style="display:flex; gap:.6rem;">
+          {% if v.translation %}
+          <form method="post" action="{{ url_for('delete_translation', refnr=v.refnr) }}" style="margin:0;">
+            <button type="submit" class="btn danger">Удалить</button>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('retranslate', refnr=v.refnr) }}" style="margin:0;">
+            <button type="submit" class="btn">Перевести</button>
+          </form>
+          {% endif %}
+          <button type="button" class="btn" data-edit-toggle="translation">
+            {% if v.translation %}Редактировать перевод{% else %}Добавить перевод{% endif %}
+          </button>
+        </div>
+      </div>
+      <div data-view="translation">
+        {% if v.translation %}
+        <pre class="term">{{ v.translation }}</pre>
+        {% else %}
+        <p class="muted">Перевод недоступен.</p>
+        {% endif %}
+      </div>
+      <div data-editor="translation" hidden>
+        <form method="post" action="{{ url_for('edit_vacancy_text', refnr=v.refnr) }}">
+          <input type="hidden" name="field" value="translation">
+          <textarea name="text" rows="12">{{ v.translation or '' }}</textarea>
+          <p>
+            <button type="submit" class="btn small">Сохранить перевод</button>
+            <button type="button" class="btn small" data-edit-cancel="translation">Отмена</button>
+          </p>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <section class="card vacancy-review" id="your-review" style="margin-top:1.2rem;">
+    <h2>Ваша оценка вакансии</h2>
+    <p class="muted">Подходит ли вам эта работа? Ваш ответ поможет проверить качество подбора. Автоматический балл сохранится отдельно.</p>
+    {% if review %}
+    <p class="review-status" role="status">Ваша оценка: <strong>{{ grade_labels.get(review.grade, '') }}</strong>. Сохранено {{ review.updated_at }} (UTC).</p>
+    {% if review_stale %}<p class="review-warning">После вашей оценки изменились документы профиля или вакансия. Проверьте её ещё раз.</p>{% endif %}
+    {% elif review_context %}<p class="muted">Вы ещё не оценили эту вакансию.</p>{% endif %}
+    {% if request.args.get('review_saved') %}<p role="status" class="alert-ok">Ваша оценка сохранена.</p>{% endif %}
+    {% if request.args.get('review_cleared') %}<p role="status" class="alert-ok">Ваша оценка убрана.</p>{% endif %}
+    {% if review_error %}<p role="alert" class="alert-err">{{ review_error }}</p>{% endif %}
+    {% if review_context %}
+    <form method="post" action="{{ url_for('review_vacancy', refnr=v.refnr) }}">
+      <input type="hidden" name="review_context" value="{{ review_context }}">
+      <label for="review-reason">Пояснение <span class="muted">(необязательно)</span></label>
+      <textarea id="review-reason" name="reason" rows="3" maxlength="2000" placeholder="Что подходит или мешает откликнуться?">{{ review_form.reason or '' }}</textarea>
+      <p class="muted">Нажмите на оценку, чтобы сохранить ответ и пояснение. Можно изменить ответ позже.</p>
+      <div class="review-actions" role="group" aria-label="Оцените пригодность вакансии">
+        {% for grade, label in grade_labels.items() %}
+        <button type="submit" name="grade" value="{{ grade }}" class="btn review-choice review-grade-{{ grade }}{% if review_form.grade == grade %} selected{% endif %}" aria-pressed="{{ 'true' if review_form.grade == grade else 'false' }}">{{ label }}</button>
+        {% endfor %}
+        {% if review %}
+        <button type="submit" name="grade" value="{{ review.grade }}" class="btn secondary">Сохранить пояснение</button>
+        <button type="submit" name="action" value="clear" class="btn secondary" formnovalidate>Убрать мою оценку</button>
+        {% endif %}
+      </div>
+    </form>
+    {% else %}<a class="btn secondary" href="{{ url_for('vacancy', refnr=v.refnr, _anchor='your-review') }}">Оценить вакансию</a>{% endif %}
+  </section>
+
+  <div class="card" style="margin-top:1.2rem;">
+    {% if letter_path or cv_path %}
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      {% if letter_path %}
+      <div style="display:flex;align-items:center;gap:.8rem;">
+        <a href="{{ url_for('anschreiben_view', refnr=v.refnr) }}"
+           target="_blank" rel="noopener"
+           title="{{ letter_label }}">📄 {{ letter_label }}</a>
+        <a class="btn small" style="margin-left:auto;"
+           href="{{ url_for('anschreiben_download', refnr=v.refnr) }}"
+        >Скачать</a>
+        <form method="post" style="margin:0;"
+              action="{{ url_for('dossier_delete', refnr=v.refnr, doc='anschreiben') }}">
+          <button type="submit" class="btn small danger">Удалить</button>
+        </form>
+      </div>
+      {% endif %}
+      {% if cv_path %}
+      <div style="display:flex;align-items:center;gap:.8rem;">
+        <a href="{{ url_for('lebenslauf_view', refnr=v.refnr) }}"
+           target="_blank" rel="noopener"
+           title="{{ cv_label }}">📄 {{ cv_label }}</a>
+        <a class="btn small" style="margin-left:auto;"
+           href="{{ url_for('lebenslauf_download', refnr=v.refnr) }}"
+        >Скачать</a>
+        <form method="post" style="margin:0;"
+              action="{{ url_for('dossier_delete', refnr=v.refnr, doc='lebenslauf') }}">
+          <button type="submit" class="btn small danger">Удалить</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <form method="post" action="{{ url_for('apply_vacancy', refnr=v.refnr) }}" style="margin:0;">
+      <button type="submit" class="btn">Создать Anschreiben</button>
+    </form>
+    {% endif %}
+
+    {% if application_status == 'prepared' %}
+    <hr class="sep">
+    <form method="post" action="{{ url_for('confirm_applied', refnr=v.refnr) }}" style="margin:0;">
+      <button type="submit" class="btn danger">Отклик на вакансию отправлен</button>
+    </form>
+    {% elif application_status == 'applied' and applied_date %}
+    <hr class="sep">
+    <p style="margin:0;"><strong>Отклик на вакансию отправлен {{ applied_date }}</strong></p>
+    {% endif %}
+  </div>
+
+  {% if apply_message %}<p class="alert-ok">{{ apply_message }}</p>{% endif %}
+  {% if apply_error %}<p class="alert-err">{{ apply_error }}</p>{% endif %}
+
+  <script>
+    document.querySelectorAll('[data-edit-toggle]').forEach(function (btn) {
+      var key = btn.getAttribute('data-edit-toggle');
+      var view = document.querySelector('[data-view="' + key + '"]');
+      var editor = document.querySelector('[data-editor="' + key + '"]');
+      var cancel = document.querySelector('[data-edit-cancel="' + key + '"]');
+      if (!view || !editor) return;
+      function open() {
+        btn.hidden = true;
+        view.style.display = 'none';
+        editor.hidden = false;
+        var ta = editor.querySelector('textarea');
+        if (ta) { ta.focus(); }
+      }
+      function close() {
+        btn.hidden = false;
+        editor.hidden = true;
+        view.style.display = '';
+      }
+      btn.addEventListener('click', open);
+      if (cancel) { cancel.addEventListener('click', close); }
+    });
+    setTimeout(function () {
+      document.querySelectorAll('.alert-ok, .alert-err').forEach(function (el) {
+        el.style.transition = 'opacity .4s ease';
+        el.style.opacity = '0';
+        setTimeout(function () { el.remove(); }, 400);
+      });
+    }, 3000);
+  </script>
+  {% endif %}
+  <p style="margin-top:1.4rem;"><a href="{{ url_for('results') }}">← Назад к результатам</a></p>
+{% endblock %}

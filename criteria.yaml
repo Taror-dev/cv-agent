@@ -1,0 +1,106 @@
+region: 88239 Wangen im Allgäu
+radius_km: 50
+limits:
+  # Gemeinsamer cross-process Pool für HTTP-Quellen/Health-Checks.
+  network_concurrency: 4
+  # Separater Pool pro provider/base_url/model; 429-Schlaf hält keinen Slot.
+  llm_backend_concurrency: 1
+search:
+  max_keywords: 12
+  per_query_limit: 25
+  total_limit: 100
+  similarity_threshold: 0.9
+  description_ttl_hours: 168
+  # Empty: derive get-in-it Berufsfelder from the current account keywords.
+  getinit_categories: []
+keywords:
+- AI Engineer
+- KI-Entwickler
+- Softwareentwickler
+- Integrationsentwickler
+- RAG
+- Prompt Engineering
+- Python
+- JavaScript
+- Node.js
+- API
+- SQL
+- Git
+- Docker
+- PostgreSQL
+- Java
+- Systemintegration
+- Automatisierung
+exclusions:
+  title:
+    words: [Zeitarbeit, Vertrieb, Callcenter, Sales]
+    regex: []
+  company:
+    words: []
+    regex: []
+  description:
+    words: [Zeitarbeit, Vertrieb, Callcenter, Sales]
+    regex: []
+min_score: 70
+scoring:
+  # Experimenteller Engine; Standard bleibt LLM bis zum Qualitäts-Pilot.
+  engine: llm
+  embeddings:
+    model: qwen3-embedding:0.6b
+    dimensions: 1024
+    batch_size: 8
+    timeout: 120
+  weights: {skills: 0.4, tasks: 0.3, qualifications: 0.2, location: 0.1}
+  similarity_low: 0.45
+  similarity_high: 0.85
+  mandatory_mismatch_cap: 49
+# Kontext-Limits für Kandidatendokumente je LLM-Klasse (Zeichen):
+# external = Cloud-Provider (Gemini/Groq), ollama = lokales Modell.
+# Fehlende Werte fallen auf die Defaults der jeweiligen Klasse zurück.
+# Werte bewusst moderat: Groq Free-Tier hat nur ~8000 Tokens/Minute,
+# größere Scoring-Prompts würden jeden Request in ein 60s-429-Backoff zwingen.
+document_limits:
+  external:
+    per_file: 8000
+    keywords: 24000
+    scoring: 14000
+    letter: 14000
+  ollama:
+    per_file: 6000
+    keywords: 8000
+    scoring: 12000
+    letter: 12000
+recruiting_agencies:
+  keywords:
+  - Personaldienstleistung
+  - Arbeitsvermittlung
+  - Recruiting
+  - Personal Management
+  - Personalleasing
+  - Zeitarbeit
+  companies:
+  - FERCHAU
+  - ALTEN
+  - Brunel
+  - engineering people
+  - expertum
+  - AERO HighProfessionals
+  - consult16
+  - SimpleXX
+  - Schmieder GmbH Unternehmensberatung
+  - N.O.C Engineering
+  - expo3
+  - WURAVENTA
+  - agento
+llm:
+  provider: ollama
+  model: qwen3.8:latest
+  base_url: http://localhost:11434/v1
+  api_key_env: OLLAMA_API_KEY
+  temperature: 0.3
+llm_fallback:
+  provider: gemini
+  model: gemini-3.5-flash-lite
+  base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  api_key_env: GEMINI_API_KEY
+  temperature: 0.3

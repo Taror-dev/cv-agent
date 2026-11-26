@@ -1,0 +1,232 @@
+# Fictional texts and independently specified scenario expectations.
+# This is NOT human validation of real vacancies or a held-out hiring dataset.
+version: 1
+label_source: synthetic_scenario_expectations
+profiles:
+  backend:
+    scoring_preferences: {work_mode: any, cities: []}
+    documents:
+      - id: backend-cv
+        kind: cv
+        text: |
+          Python, SQL, PostgreSQL, REST API, Docker, Git
+          Deutsch B2
+          Englisch B2
+          Berufserfahrung:
+          Entwickelte REST-Schnittstellen zur Integration von Geschäftsanwendungen.
+          Automatisierte Datenimporte und analysierte Fehler in Python-Diensten.
+  frontend:
+    scoring_preferences: {work_mode: any, cities: []}
+    documents:
+      - id: frontend-cv
+        kind: cv
+        text: |
+          JavaScript, TypeScript, React, Git
+          Deutsch B2
+          Englisch C1
+          Work experience:
+          Developed accessible React user interfaces and reusable web components.
+          Implemented browser forms and integrated frontend applications with HTTP services.
+  operations:
+    scoring_preferences: {work_mode: any, cities: []}
+    documents:
+      - id: operations-cv
+        kind: cv
+        text: |
+          Linux, Docker, Kubernetes, Git
+          Deutsch C1
+          Englisch B2
+          Опыт работы:
+          Администрировал серверы Linux, устранял сбои и следил за доступностью сервисов.
+          Автоматизировал развёртывание контейнеров Docker и управлял кластерами Kubernetes.
+  office:
+    scoring_preferences: {work_mode: any, cities: []}
+    documents:
+      - id: office-cv
+        kind: cv
+        text: |
+          Excel, SAP
+          Deutsch C1
+          Englisch B2
+          Berufserfahrung:
+          Bearbeitete Rechnungen und verwaltete Zahlungseingänge in der Buchhaltung.
+          Organisierte Bürotermine und betreute Kundenanfragen per Telefon.
+  learner:
+    scoring_preferences: {work_mode: any, cities: []}
+    documents:
+      - id: learner-cv
+        kind: cv
+        text: |
+          Excel
+          Deutsch B1
+          Englisch B1
+          Berufserfahrung:
+          Organisierte Bürotermine und verwaltete einfache Tabellen.
+      - id: learner-course
+        kind: curriculum
+        text: |
+          Python, SQL, REST API, Docker, React, Linux, Kubernetes
+          Develop software and integrate business applications in a course.
+          Administer Linux servers and automate container deployment in training.
+vacancies:
+  api_de:
+    group: api_de
+    split: calibration
+    title: Entwickler für Geschäftsschnittstellen
+    location: Berlin
+    text: |
+      Anforderungen:
+      Python erforderlich.
+      REST-Schnittstellen erforderlich.
+      Deutsch B2 erforderlich.
+      Aufgaben:
+      Entwickeln Sie APIs für den Datenaustausch zwischen Geschäftsanwendungen.
+      Integrieren Sie interne Systeme und automatisieren Sie Datenimporte.
+  web_en:
+    group: web_en
+    split: calibration
+    title: Accessible Web Developer
+    location: Munich
+    text: |
+      Requirements:
+      React required.
+      TypeScript required.
+      English B2 required.
+      Responsibilities:
+      Design accessible browser interfaces and reusable React components.
+      Implement interactive forms and connect the user interface to backend services.
+  ops_ru:
+    group: ops_ru
+    split: calibration
+    title: Инженер эксплуатации
+    location: Hamburg
+    text: |
+      Требования:
+      Linux требуется.
+      Docker требуется.
+      Englisch B2 требуется.
+      Задачи:
+      Администрирование серверов и устранение сбоев производственных сервисов.
+      Автоматизация развёртывания приложений в контейнерах.
+  accounting_de:
+    group: accounting_de
+    split: calibration
+    title: Mitarbeiter Rechnungswesen
+    location: Wangen im Allgäu
+    text: |
+      Ihr Profil:
+      Excel erforderlich.
+      SAP wünschenswert.
+      Deutsch B2 erforderlich.
+      Aufgaben:
+      Bearbeitung von Lieferantenrechnungen und Verwaltung von Zahlungseingängen.
+      Betreuung der Buchhaltung und Abstimmung offener Rechnungen.
+  api_c1:
+    group: api_c1
+    split: calibration
+    title: Schnittstellenentwickler mit Deutsch C1
+    location: Berlin
+    text: |
+      Anforderungen:
+      Python erforderlich.
+      REST API erforderlich.
+      Deutsch C1 erforderlich.
+      Aufgaben:
+      Entwickeln Sie REST-Schnittstellen zur Integration von Geschäftssystemen.
+  junior_office:
+    group: junior_office
+    split: calibration
+    title: Junior Office Assistant
+    location: Berlin
+    text: |
+      Requirements:
+      Excel required.
+      German B1 required.
+      No professional experience required.
+      Responsibilities:
+      Organise office appointments and maintain simple spreadsheets.
+      We offer:
+      Python courses and technical training.
+  java_exact:
+    group: java_exact
+    split: calibration
+    title: Java Backend Developer
+    location: Berlin
+    text: |
+      Requirements:
+      Java required.
+      Spring Boot required.
+      English B2 required.
+      Responsibilities:
+      Develop Java backend software and integrate business applications.
+  k8s_en:
+    group: k8s_en
+    split: calibration
+    title: Container Platform Engineer
+    location: Hamburg
+    text: |
+      Requirements:
+      Kubernetes required.
+      Linux required.
+      English B2 required.
+      Responsibilities:
+      Maintain container clusters and automate service deployment.
+      Diagnose infrastructure incidents and restore service availability.
+  integrations_ru:
+    group: integrations_ru
+    split: holdout
+    title: Разработчик интеграций
+    location: Berlin
+    text: |
+      Требования:
+      Python требуется.
+      SQL требуется.
+      Englisch B2 требуется.
+      Задачи:
+      Разработка интерфейсов обмена данными между корпоративными приложениями.
+      Автоматизация импорта данных и анализ ошибок интеграции.
+  frontend_de:
+    group: frontend_de
+    split: holdout
+    title: Entwickler für Weboberflächen
+    location: Munich
+    text: |
+      Anforderungen:
+      JavaScript erforderlich.
+      React erforderlich.
+      Deutsch B2 erforderlich.
+      Aufgaben:
+      Entwickeln Sie barrierefreie Weboberflächen und wiederverwendbare Komponenten.
+      Implementieren Sie Eingabeformulare für Kunden im Browser.
+  reliability_en:
+    group: reliability_en
+    split: holdout
+    title: Linux Reliability Engineer
+    location: Hamburg
+    text: |
+      Requirements:
+      Linux required.
+      Docker required.
+      English B2 required.
+      Responsibilities:
+      Maintain Linux service availability and investigate operational failures.
+      Automate deployments of containerised applications.
+  office_ru:
+    group: office_ru
+    split: holdout
+    title: Координатор офиса
+    location: Wangen im Allgäu
+    text: |
+      Требования:
+      Excel требуется.
+      Deutsch B2 требуется.
+      Задачи:
+      Организация встреч и ведение рабочего календаря офиса.
+      Обработка счетов и управление таблицами с платежами клиентов.
+# Rows authored before running either vector model; no grades derived from scores.
+judgments:
+  backend: {api_de: 2, web_en: 0, ops_ru: 0, accounting_de: 0, api_c1: 1, junior_office: 0, java_exact: 0, k8s_en: 0, integrations_ru: 2, frontend_de: 0, reliability_en: 1, office_ru: 0}
+  frontend: {api_de: 0, web_en: 2, ops_ru: 0, accounting_de: 0, api_c1: 0, junior_office: 0, java_exact: 0, k8s_en: 0, integrations_ru: 0, frontend_de: 2, reliability_en: 0, office_ru: 0}
+  operations: {api_de: 0, web_en: 0, ops_ru: 2, accounting_de: 0, api_c1: 0, junior_office: 0, java_exact: 0, k8s_en: 2, integrations_ru: 0, frontend_de: 0, reliability_en: 2, office_ru: 0}
+  office: {api_de: 0, web_en: 0, ops_ru: 0, accounting_de: 2, api_c1: 0, junior_office: 2, java_exact: 0, k8s_en: 0, integrations_ru: 0, frontend_de: 0, reliability_en: 0, office_ru: 2}
+  learner: {api_de: 0, web_en: 0, ops_ru: 0, accounting_de: 1, api_c1: 0, junior_office: 2, java_exact: 0, k8s_en: 0, integrations_ru: 0, frontend_de: 0, reliability_en: 0, office_ru: 1}
